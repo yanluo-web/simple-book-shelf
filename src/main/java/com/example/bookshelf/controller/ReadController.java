@@ -141,7 +141,7 @@ public class ReadController {
             e.printStackTrace();
         }
 
-        return "redirect:/read/" + bookId;
+        return "redirect:/read/onRead/" + bookId;
     }
 
     /**

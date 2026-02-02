@@ -85,7 +85,7 @@
                 <h4 th:text="${book.bookName} + ' - 章节列表'">书籍名称 - 章节列表</h4>
                 <ul class="chapter-list">
                     <li th:each="chapter : ${chapters}">
-                        <a th:href="|/read/onRead/switchChapter?bookId=${book.id}&chapterOrder=${chapter.chapterOrder}|"
+                        <a th:href="|/read/switchChapter?bookId=${book.id}&chapterOrder=${chapter.chapterOrder}|"
                            th:class="${currentChapter != null and chapter.id == currentChapter.id ? 'active' : ''}"
                            th:text="${chapter.chapterTitle}"
                            title="${chapter.chapterTitle}">章节标题</a>
