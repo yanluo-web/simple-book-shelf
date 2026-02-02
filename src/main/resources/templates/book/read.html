@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${book != null ? book.bookName + ' - 在线阅读' : '在线阅读'}">书籍阅读 - 极简书架</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 70px;
+            background-color: #f8f8f8;
+        }
+        .read-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        .book-meta {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .book-content {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #333;
+            white-space: pre-wrap;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .chapter-sidebar {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin-bottom: 30px;
+        }
+        .chapter-sidebar h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .chapter-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .chapter-list li {
+            margin-bottom: 5px;
+        }
+        .chapter-list a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .chapter-list a:hover {
+            background-color: #e9e9e9;
+            color: #337ab7;
+        }
+        .chapter-list a.active {
+            background-color: #337ab7;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<!-- ========== 替换：引入公共导航栏片段 ========== -->
+<!-- 传入 activePage="read"，标记「阅读」为当前活跃页面 -->
+<div th:replace="common/navbar :: commonNavbar('read')"></div>
+
+<div class="container">
+    <div class="row">
+        <!-- 左侧章节列表（先判断 book 和 chapters 非空） -->
+        <div class="col-md-3" th:if="${book != null and chapters != null and not #lists.isEmpty(chapters)}">
+            <div class="chapter-sidebar">
+                <h4 th:text="${book.bookName} + ' - 章节列表'">书籍名称 - 章节列表</h4>
+                <ul class="chapter-list">
+                    <li th:each="chapter : ${chapters}">
+                        <a th:href="|/read/onRead/switchChapter?bookId=${book.id}&chapterOrder=${chapter.chapterOrder}|"
+                           th:class="${currentChapter != null and chapter.id == currentChapter.id ? 'active' : ''}"
+                           th:text="${chapter.chapterTitle}"
+                           title="${chapter.chapterTitle}">章节标题</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧阅读区域（核心：先判断 currentChapter 非空） -->
+        <div class="col-md-9" th:if="${book != null}">
+            <div class="read-container">
+                <!-- 书籍元信息（先判断 currentChapter 非空） -->
+                <div class="book-meta" th:if="${currentChapter != null}">
+                    <h2 th:text="${currentChapter.chapterTitle ?: '无标题章节'}">当前章节标题</h2>
+                    <p class="text-muted">
+                        书籍：<span th:text="${book.bookName ?: '未知书籍'}">书籍名称</span>
+                        &nbsp;&nbsp;
+                        作者：<span th:text="${book.author ?: '未知'}">未知</span>
+                        &nbsp;&nbsp;
+                        格式：<span th:text="${book.format ?: '未知'}">TXT</span>
+                        &nbsp;&nbsp;
+                        章节：<span th:text="${currentChapter.chapterOrder ?: 0} + '/' + ${chapters != null ? chapters.size() : 0}">1/100</span>
+                        &nbsp;&nbsp;
+                        <a th:href="'/shelf/shelfLsit/' + ${book.shelfId ?: 1}" class="btn btn-xs btn-default">返回书架</a>
+                    </p>
+                </div>
+
+                <!-- 书籍内容（先判断 currentChapter 非空，兜底空内容） -->
+                <div class="book-content"
+                     th:if="${currentChapter != null}"
+                     th:attr="data-read-position=${readPosition ?: 0}"
+                     th:utext="${#strings.replace(currentChapter.chapterContent ?: '暂无章节内容', '\n', '<br/>')}">
+                    这里是书籍内容...
+                </div>
+
+                <!-- 无章节内容提示（currentChapter 为 null 时显示） -->
+                <div class="alert alert-warning" th:if="${currentChapter == null}">
+                    暂无有效章节内容，请先拆分书籍TXT文件
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<!--<script>
+    // 页面加载完成后执行（先判断 DOM 元素存在，避免 JS 报错）
+    $(document).ready(function() {
+        const $bookContent = $('.book-content');
+        if ($bookContent.length === 0) {
+            return; // 无阅读区域，直接返回
+        }
+
+        const readPosition = parseInt($bookContent.data('read-position'));
+        if (!isNaN(readPosition) && readPosition > 0) {
+            $bookContent.scrollTop(readPosition);
+        }
+
+        let lastUpdateTime = 0;
+        $bookContent.on('scroll', function() {
+            const now = Date.now();
+            const scrollTop = $(this).scrollTop();
+            if (now - lastUpdateTime > 3000) {
+                updateReadPosition(scrollTop);
+                lastUpdateTime = now;
+            }
+        });
+
+        $(window).on('beforeunload', function() {
+            const scrollTop = $bookContent.scrollTop();
+            updateReadPosition(scrollTop);
+        });
+
+        function updateReadPosition(scrollTop) {
+            // 先判断 Thymeleaf 变量非空
+            const bookId = [[${book != null ? book.id : 0}]];
+            const chapterId = [[${currentChapter != null ? currentChapter.id : 0}]];
+            if (bookId === 0 || chapterId === 0) {
+                return;
+            }
+
+            $.post('/read/updatePosition', {
+                bookId: bookId,
+                chapterId: chapterId,
+                readPosition: scrollTop
+            }, function(response) {
+            }).fail(function(error) {
+                console.log('阅读位置更新失败：', error);
+            });
+        }
+    });-->
+</script>
+</body>
+</html>

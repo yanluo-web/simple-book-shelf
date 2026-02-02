@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简书架 - 用户管理</title>
+    <!-- 引入 Bootstrap 样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            padding-top: 80px;
+            padding-bottom: 50px;
+        }
+
+        /* 导航栏样式（与公共片段保持一致） */
+        .navbar-inverse {
+            background-color: #2f4050;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-inverse .navbar-brand,
+        .navbar-inverse .navbar-nav > li > a {
+            color: #f3f3f4;
+        }
+
+        .navbar-inverse .navbar-brand:hover,
+        .navbar-inverse .navbar-nav > li > a:hover {
+            color: #1ab394;
+            background-color: transparent;
+        }
+
+        /* 容器样式 */
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* 提示信息样式 */
+        .tip-container {
+            max-width: 1200px;
+            margin: 0 auto 20px auto;
+        }
+
+        .success-tip {
+            padding: 15px 20px;
+            background-color: #f0f9f6;
+            border: 1px solid #d9f2e9;
+            border-radius: 6px;
+            color: #18a689;
+            font-size: 14px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(26, 179, 148, 0.1);
+        }
+
+        .error-tip {
+            padding: 15px 20px;
+            background-color: #fdf7f7;
+            border: 1px solid #f2dede;
+            border-radius: 6px;
+            color: #a94442;
+            font-size: 14px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(169, 68, 66, 0.1);
+        }
+
+        /* 标题样式 */
+        .page-title {
+            color: #2f4050;
+            font-size: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        /* 表单与表格样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background-color: #1ab394;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #18a689;
+        }
+
+        .btn-danger {
+            background-color: #ed5565;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #da4453;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table th {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #e6e6e6;
+            color: #676a6c;
+        }
+
+        .modal-header {
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e6e6e6;
+        }
+    </style>
+</head>
+<body>
+<!-- 引入公共导航栏，标记当前活跃页面为 user，传递管理员标识 -->
+<div th:replace="common/navbar :: commonNavbar('user')"></div>
+
+<!-- 提示信息 -->
+<div class="tip-container">
+    <div th:if="${msg}" class="success-tip" th:text="${msg}"></div>
+    <div th:if="${error}" class="error-tip" th:text="${error}"></div>
+</div>
+
+<!-- 主容器 -->
+<div class="container-custom">
+    <h2 class="page-title">用户管理</h2>
+
+    <!-- 新增用户表单 -->
+    <div class="panel panel-default">
+        <div class="panel-heading">新增用户</div>
+        <div class="panel-body">
+            <form action="/user/add" method="post" class="form-horizontal">
+                <div class="form-group">
+                    <label for="username" class="col-sm-2 control-label">用户名</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名" required>
+                    </div>
+                    <label for="password" class="col-sm-2 control-label">初始密码</label>
+                    <div class="col-sm-4">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="请输入初始密码" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nickname" class="col-sm-2 control-label">用户昵称</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="nickname" name="nickname" placeholder="请输入用户昵称" required>
+                    </div>
+                    <label for="role" class="col-sm-2 control-label">用户角色</label>
+                    <div class="col-sm-4">
+                        <select class="form-control" id="role" name="role" required>
+                            <option value="USER">普通用户</option>
+                            <option value="ADMIN">管理员</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary">新增用户</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用户列表与操作 -->
+    <div class="panel panel-default">
+        <div class="panel-heading">用户列表</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>昵称</th>
+                    <th>角色</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${userList}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.username}"></td>
+                    <td th:text="${user.nickname}"></td>
+                    <td th:text="${user.role == 'ADMIN' ? '管理员' : '普通用户'}"></td>
+                    <td th:text="${user.enabled ? '启用' : '禁用'}"></td>
+                    <td>
+                        <!-- 修改用户信息（模态框触发） -->
+                        <button class="btn btn-xs btn-primary" data-toggle="modal" data-target="#updateModal"
+                                th:attr="data-user-id=${user.id}, data-username=${user.username}, data-nickname=${user.nickname}, data-role=${user.role}, data-enabled=${user.enabled}">
+                            修改信息
+                        </button>
+                        <!-- 修改密码（模态框触发） -->
+                        <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#pwdModal"
+                                th:attr="data-user-id=${user.id}">
+                            修改密码
+                        </button>
+                        <!-- 删除用户 -->
+                        <a th:href="'/user/delete/' + ${user.id}" class="btn btn-xs btn-danger"
+                           onclick="return confirm('确定要删除该用户吗？删除后不可恢复！')">
+                            删除
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 修改用户信息模态框 -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="updateModalLabel">修改用户信息</h4>
+            </div>
+            <form action="/user/update" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="updateId" name="id">
+                    <div class="form-group">
+                        <label for="updateUsername">用户名</label>
+                        <input type="text" class="form-control" id="updateUsername" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateNickname">用户昵称</label>
+                        <input type="text" class="form-control" id="updateNickname" name="nickname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateRole">用户角色</label>
+                        <select class="form-control" id="updateRole" name="role" required>
+                            <option value="USER">普通用户</option>
+                            <option value="ADMIN">管理员</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateEnabled">用户状态</label>
+                        <select class="form-control" id="updateEnabled" name="enabled" required>
+                            <option value="true">启用</option>
+                            <option value="false">禁用</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 修改密码模态框 -->
+<div class="modal fade" id="pwdModal" tabindex="-1" role="dialog" aria-labelledby="pwdModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="pwdModalLabel">修改用户密码</h4>
+            </div>
+            <form action="/user/update/password" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="pwdId" name="id">
+                    <div class="form-group">
+                        <label for="newPassword">新密码</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="请输入新密码" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="submit" class="btn btn-primary">保存密码</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 jQuery 和 Bootstrap JS（模态框需要） -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script>
+    // 初始化修改用户模态框数据
+    $('#updateModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // 触发模态框的按钮
+        var userId = button.data('user-id');
+        var username = button.data('username');
+        var nickname = button.data('nickname');
+        var role = button.data('role');
+        var enabled = button.data('enabled');
+
+        var modal = $(this);
+        modal.find('#updateId').val(userId);
+        modal.find('#updateUsername').val(username);
+        modal.find('#updateNickname').val(nickname);
+        modal.find('#updateRole').val(role);
+        modal.find('#updateEnabled').val(enabled.toString());
+    });
+
+    // 初始化修改密码模态框数据
+    $('#pwdModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var userId = button.data('user-id');
+
+        var modal = $(this);
+        modal.find('#pwdId').val(userId);
+    });
+</script>
+</body>
+</html>

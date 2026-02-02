@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>极简书架 - 首页</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 修复导航栏固定导致的内容遮挡，优化间距 */
+        body {
+            padding-top: 70px;
+        }
+        .thumbnail {
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+        .thumbnail:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<!-- ========== 替换：引入公共导航栏片段 ========== -->
+<!-- 传入 activePage="index"，标记「首页」为当前活跃页面 -->
+<div th:replace="common/navbar :: commonNavbar('index')"></div>
+
+<div class="container">
+    <!-- 书架列表 -->
+    <div class="panel panel-default">
+        <div class="panel-heading">我的书架</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="thumbnail">
+                        <img src="https://cdn.bootcdn.net/ajax/libs/placeholder/4.0.1/placeholder-400x300.png"
+                             alt="书架封面" class="img-responsive">
+                        <div class="caption">
+                            <h3>默认书架</h3>
+                            <!-- 实时渲染书籍数量：从后端 model 中获取 -->
+                            <p th:text="'包含 ' + ${bookCount} + ' 本书'">包含 0 本书</p>
+                            <!-- 进入书架详情页：跳转至 /book/shelf/{defaultShelfId} -->
+                            <p>
+                                <a th:href="'/shelf/shelfLsit/' + ${defaultShelfId}"
+                                   class="btn btn-primary" role="button">进入书架</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 jQuery 和 Bootstrap JS（可选，增强交互） -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- 新增 Spring Security 命名空间：sec -->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- 定义导航栏片段，仅保留 activePage 参数，移除 isAdmin 参数 -->
+<nav class="navbar navbar-inverse navbar-fixed-top" th:fragment="commonNavbar(activePage)">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/index">极简书架</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <!-- 根据传入的 activePage 判断哪个菜单项高亮 -->
+                <li th:class="${activePage == 'index' ? 'active' : ''}">
+                    <a href="/index">我的书架</a>
+                </li>
+                <li th:class="${activePage == 'import' ? 'active' : ''}">
+                    <a href="/book/importPage">导入书籍</a>
+                </li>
+                <!-- 管理员专属菜单：自动判断当前登录用户是否为 ADMIN 角色，无需手动传参 -->
+                <li th:class="${activePage == 'user' ? 'active' : ''}"
+                    sec:authorize="hasRole('ADMIN')"> <!-- 核心：Spring Security 角色判断 -->
+                    <a href="/user/manage">用户管理</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <!-- 可选：显示当前登录用户名 -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <span sec:authentication="name">当前用户</span> <!-- 获取当前登录用户名 -->
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/logout">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

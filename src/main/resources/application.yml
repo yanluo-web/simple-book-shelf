@@ -1,0 +1,53 @@
+# 端口配置
+server:
+  port: 8088
+# Spring 配置
+spring:
+  # 数据源配置（H2 嵌入式数据库，文件模式：数据持久化到本地，重启不丢失）
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./book-shelf-data/db/book_shelf;AUTO_SERVER=TRUE
+    username: sa
+    password: 123456
+  # H2 控制台配置（方便调试，生产环境可关闭）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB
+  # Thymeleaf 配置
+  thymeleaf:
+    cache: false # 开发环境关闭缓存，生产环境开启
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+  # SQL 脚本自动执行配置（核心修改：避免重复执行）
+  sql:
+    init:
+      schema-locations: classpath:sql/schema.sql
+      data-locations: classpath:sql/data.sql
+      mode: embedded # 关键修改：仅首次创建嵌入式数据库时执行 SQL，后续重启不执行 embedded always
+  # 关闭 Hibernate 自动建表
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+# MyBatis 配置（顶级配置，和 spring 同级，不能嵌套在 spring 里面）
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: com.example.bookshelf.entity
+  configuration:
+    map-underscore-to-camel-case: true # 下划线转驼峰
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志（开发环境）
+
+# 自定义配置：书籍存储目录（顶级配置，和 spring 同级，不能嵌套在 spring 里面）
+book:
+  storage:
+    path: ./book-shelf-data/books/
