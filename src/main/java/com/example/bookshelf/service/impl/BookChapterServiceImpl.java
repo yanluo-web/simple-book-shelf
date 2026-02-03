@@ -41,16 +41,16 @@ public class BookChapterServiceImpl implements BookChapterService {
                 throw new RuntimeException("TXT 文件内容为空，无法拆分章节");
             }
 
-            // 2. 正则匹配章节标题（新增：序、第X节；保留：第X章、Chapter X）
+            // 2. 正则匹配章节标题（新增：序：、第X节；保留：第X章、Chapter X）
             // 匹配规则：
-            // - 序：单独的“序”“序言”“引子”等
+            // - 序：必须带冒号（序：、序言：、引子：）
             // - 节：第X节、第XX节（支持中文数字/阿拉伯数字）
             // - 章：原有规则不变
             String chapterRegex =
-                    "(序(?:言|子)?[:：]?)|" +  // 匹配“序”“序言：”“引子：”等
+                    "(序(?:言|子)?[:：])|" +  // 仅匹配“序：”“序言：”“引子：”（必须带冒号）
                             "(第[一二三四五六七八九十百千万\\d]+节(?:\\s+.+)?)|" +  // 匹配“第1节”“第三节 标题”等
                             "(第[一二三四五六七八九十百千万\\d]+章(?:\\s+.+)?)|" +  // 原有章匹配
-                            "(Chapter\\s+\\d+(?:\\s+.+)?)";  // 原有Chapter匹配
+                            "(Chapter\\s+\\d+(?:\\s+.+)?)";
             Pattern pattern = Pattern.compile(chapterRegex);
             Matcher matcher = pattern.matcher(txtContent);
 
