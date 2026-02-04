@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>娱乐模块 - 极简书架</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f7fa;
+        }
+        /* 娱乐模块主容器：居中 */
+        .entertainment-container {
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        /* 标题样式 */
+        .entertainment-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        /* 菜单卡片样式 */
+        .menu-card {
+            display: inline-block;
+            width: 200px;
+            padding: 30px 20px;
+            margin: 0 20px;
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .menu-card:hover {
+            background-color: #2980b9;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        .menu-card h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .menu-card p {
+            margin: 10px 0 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<!-- 引入公共导航栏 -->
+<div th:replace="common/navbar :: commonNavbar('entertainment')"></div>
+
+<!-- 娱乐模块主内容 -->
+<div class="entertainment-container">
+    <h2 class="entertainment-title">娱乐模块</h2>
+    <!-- 海克斯卡牌菜单 -->
+    <a href="/entertainment/hexCard" class="menu-card">
+        <h4>海克斯卡牌</h4>
+        <p>点击进入卡牌游戏</p>
+    </a>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

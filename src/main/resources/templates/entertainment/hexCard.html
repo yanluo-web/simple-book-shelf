@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>海克斯卡牌 - 娱乐模块 - 极简书架</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f7fa;
+        }
+        .main-content {
+            margin-left: 180px;
+            padding: 60px 20px 20px;
+            min-height: 100vh;
+        }
+        .empty-page {
+            text-align: center;
+            padding: 100px 0;
+            color: #7f8c8d;
+        }
+        .empty-page h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .empty-page p {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<!-- 引入公共导航栏 -->
+<div th:replace="common/navbar :: commonNavbar('entertainment')"></div>
+
+<div class="empty-page">
+    <h3>海克斯卡牌</h3>
+    <p>页面正在开发中，敬请期待...</p>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

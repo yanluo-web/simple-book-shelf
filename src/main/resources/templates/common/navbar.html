@@ -63,9 +63,13 @@
                 <li th:class="${activePage == 'import' ? 'active' : ''}">
                     <a href="/book/importPage">导入书籍</a>
                 </li>
-                <!-- 基础数据管理：仅管理员可见，点击后跳转到管理页（侧边栏自动显示） -->
+                <!-- 基础数据管理：仅管理员可见 -->
                 <li th:class="${activePage == 'basicData' ? 'active' : ''}" sec:authorize="hasRole('ADMIN')">
                     <a href="/user/userManage">基础数据管理</a>
+                </li>
+                <!-- ========== 新增：娱乐模块（仅管理员可见） ========== -->
+                <li th:class="${activePage == 'entertainment' ? 'active' : ''}" sec:authorize="hasRole('ADMIN')">
+                    <a href="/entertainment/index">娱乐模块</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
