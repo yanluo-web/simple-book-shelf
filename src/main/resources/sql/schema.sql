@@ -57,3 +57,24 @@ CREATE TABLE IF NOT EXISTS read_record (
     CONSTRAINT fk_read_record_book FOREIGN KEY (book_id) REFERENCES sys_book (id) ON DELETE CASCADE,
     CONSTRAINT fk_read_record_chapter FOREIGN KEY (chapter_id) REFERENCES book_chapter (id) ON DELETE CASCADE
     );
+
+-- 转盘表（game_wheel）
+CREATE TABLE game_wheel (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '转盘ID',
+    name VARCHAR(64) NOT NULL COMMENT '转盘名称（如：酒桌惩罚转盘）',
+    description VARCHAR(255) DEFAULT NULL COMMENT '转盘说明',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'
+);
+-- 转盘选项表（game_wheel_item）
+CREATE TABLE game_wheel_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '选项ID',
+    wheel_id BIGINT NOT NULL COMMENT '所属转盘ID',
+    content VARCHAR(128) NOT NULL COMMENT '选项内容（如：罚酒3杯）',
+    type VARCHAR(32) DEFAULT '惩罚' COMMENT '类型：惩罚/奖励/互动/整蛊',
+    weight INT NOT NULL DEFAULT 10 COMMENT '权重（越大概率越高）',
+    color VARCHAR(32) DEFAULT '#FF5733' COMMENT '转盘颜色',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+);
+-- 给转盘选项表创建索引
+CREATE INDEX idx_wheel_id ON game_wheel_item(wheel_id);

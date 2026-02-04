@@ -32,7 +32,7 @@
             display: inline-block;
             width: 200px;
             padding: 30px 20px;
-            margin: 0 20px;
+            margin: 0 20px 20px;
             background-color: #3498db;
             color: #fff;
             border-radius: 8px;
@@ -54,6 +54,14 @@
             font-size: 12px;
             opacity: 0.9;
         }
+        /* 转盘专属颜色 */
+        .menu-card-wheel {
+            background-color: #e67e22;
+        }
+        .menu-card-wheel:hover {
+            background-color: #d35400;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -63,10 +71,17 @@
 <!-- 娱乐模块主内容 -->
 <div class="entertainment-container">
     <h2 class="entertainment-title">娱乐模块</h2>
+
     <!-- 海克斯卡牌菜单 -->
-    <a href="/entertainment/hexCard" class="menu-card">
+    <a href="/entertainment/hex/hexCard" class="menu-card">
         <h4>海克斯卡牌</h4>
         <p>点击进入卡牌游戏</p>
+    </a>
+
+    <!-- 新增：转盘游戏菜单 -->
+    <a href="/entertainment/wheel" class="menu-card menu-card-wheel">
+        <h4>酒桌转盘</h4>
+        <p>随机惩罚/互动</p>
     </a>
 </div>
 

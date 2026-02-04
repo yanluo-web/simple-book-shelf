@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>选择转盘 - 娱乐模块</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f7fa;
+        }
+        .wheel-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .wheel-card {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .wheel-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .wheel-card p {
+            color: #7f8c8d;
+        }
+        .btn-wheel {
+            background-color: #e67e22;
+            color: #fff;
+        }
+        .btn-wheel:hover {
+            background-color: #d35400;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="common/navbar :: commonNavbar('entertainment')"></div>
+<div class="wheel-list">
+    <h2>选择转盘</h2>
+    <div class="wheel-card" th:each="wheel : ${wheels}">
+        <h3 th:text="${wheel.name}">转盘名称</h3>
+        <p th:text="${wheel.description}">转盘说明</p>
+        <a th:href="@{/entertainment/wheel/{id}(id=${wheel.id})}" class="btn btn-wheel">进入转盘</a>
+    </div>
+</div>
+</body>
+</html>
