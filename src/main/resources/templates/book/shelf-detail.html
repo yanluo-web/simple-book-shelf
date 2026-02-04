@@ -2,64 +2,44 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <!-- 动态设置页面标题 -->
     <title th:text="${shelf.shelfName} + ' - 书籍列表'">默认书架 - 书籍列表</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            padding-top: 70px;
-        }
-        .book-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            transition: box-shadow 0.3s ease;
-        }
-        .book-item:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        .book-item h4 {
-            margin-top: 0;
-        }
-        .book-operation .btn {
-            margin-left: 5px;
-        }
-        .alert {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
+        body { padding-top: 70px; }
+        .book-item { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 4px; transition: box-shadow 0.3s ease; }
+        .book-item:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+        .book-item h4 { margin-top: 0; }
+        .book-operation .btn { margin-left: 5px; }
+        .alert { margin-top: 20px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-<!-- 引入公共导航栏片段 -->
 <div th:replace="common/navbar :: commonNavbar('shelf-detail')"></div>
 
 <div class="container">
-    <!-- 操作结果提示（保持不变） -->
-    <div th:if="${successMsg != null and not #strings.isEmpty(successMsg)}" class="alert alert-success alert-dismissible" role="alert">
+    <!-- 操作提示（不变） -->
+    <div th:if="${successMsg != null and not #strings.isEmpty(successMsg)}" class="alert alert-success alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <span th:text="${successMsg}"></span>
     </div>
-    <div th:if="${errorMsg != null and not #strings.isEmpty(errorMsg)}" class="alert alert-danger alert-dismissible" role="alert">
+    <div th:if="${errorMsg != null and not #strings.isEmpty(errorMsg)}" class="alert alert-danger alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <span th:text="${errorMsg}"></span>
     </div>
-    <div th:if="${warnMsg != null and not #strings.isEmpty(warnMsg)}" class="alert alert-warning alert-dismissible" role="alert">
+    <div th:if="${warnMsg != null and not #strings.isEmpty(warnMsg)}" class="alert alert-warning alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <span th:text="${warnMsg}"></span>
     </div>
 
-    <!-- 动态书架标题 + 图书数量 -->
+    <!-- 动态标题（不变） -->
     <div class="page-header" th:with="bookCount=${bookList != null ? #lists.size(bookList) : 0}">
-        <!-- 核心修改：用 bookCount（从 bookList 计算）显示数量 -->
         <h1>
             <span th:text="${shelf.shelfName}">默认书架</span>
             <small>共 <span th:text="${bookCount}"></span> 本图书</small>
         </h1>
     </div>
 
-    <!-- 书籍列表（保持不变） -->
+    <!-- 书籍列表（核心修改：表单添加隐藏域传shelfId） -->
     <div class="row">
         <div class="col-md-12" th:each="book : ${bookList}" th:if="${not #lists.isEmpty(bookList)}">
             <div class="book-item" th:with="
@@ -79,14 +59,30 @@
                     </div>
                     <div class="col-md-4 text-right book-operation">
                         <a th:href="@{/read/onRead/{id}(id=${book.id})}" class="btn btn-success">立即阅读</a>
+
+                        <!-- 1. 拆分章节表单：新增隐藏域传递当前书架ID -->
                         <form th:action="@{/book/splitChapters/{id}(id=${book.id})}" method="post" style="display: inline-block;">
+                            <input type="hidden" name="shelfId" th:value="${shelf.id}"> <!-- 核心：传当前书架ID -->
                             <button type="submit" class="btn btn-primary" th:disabled="${book.format != 'TXT'}">
                                 拆分章节
                             </button>
                         </form>
-                        <form th:action="@{/book/delete/{id}(id=${book.id})}" method="get" style="display: inline-block;"
-                              onsubmit="return confirm('确定要删除《' + ([[${book.bookName}]] || '未知书籍') + '》吗？删除后无法恢复！');">
-                            <button type="submit" class="btn btn-danger">
+
+                        <!-- 2. 删除书籍表单：新增隐藏域传递当前书架ID -->
+                        <!--<form th:action="@{/book/delete/{id}(id=${book.id})}" method="get" style="display: inline-block;">
+                            <input type="hidden" name="shelfId" th:value="${shelf.id}">
+                            <button type="button" class="btn btn-danger"
+                                    onclick="return confirmDelete('[[${book.bookName}]]', this.form);">
+                                删除书籍
+                            </button>
+                        </form>-->
+
+                        <!-- 删除书籍表单 -->
+                        <form th:action="@{/book/delete/{id}(id=${book.id})}" method="get" style="display: inline-block;">
+                            <input type="hidden" name="shelfId" th:value="${shelf.id}">
+                            <button type="button"
+                                    class="btn btn-danger delete-btn"
+                                    th:attr="data-book-name=${book.bookName}, data-shelf-id=${shelf.id}">
                                 删除书籍
                             </button>
                         </form>
@@ -95,9 +91,9 @@
             </div>
         </div>
 
-        <!-- 无书籍提示 -->
+        <!-- 无书籍提示（不变） -->
         <div class="col-md-12 text-center" th:if="${bookList == null or #lists.isEmpty(bookList)}">
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-warning">
                 该书架暂无书籍，<a href="/book/importPage">点击导入</a> 第一本书吧！
             </div>
         </div>
@@ -106,5 +102,23 @@
 
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<!-- 在 </body> 标签结束前添加 -->
+<script th:inline="javascript">
+    // 等待页面加载完成
+    $(document).ready(function() {
+        // 为所有删除按钮绑定点击事件
+        $('.delete-btn').click(function() {
+            // 从 data 属性中获取书籍名称和书架 ID
+            var bookName = $(this).data('book-name') || '未知书籍';
+            var form = $(this).closest('form');
+
+            // 弹出确认框
+            if (confirm('确定要删除《' + bookName + '》吗？删除后无法恢复！')) {
+                // 如果用户确认，则提交表单
+                form.submit();
+            }
+        });
+    });
+</script>
 </body>
 </html>

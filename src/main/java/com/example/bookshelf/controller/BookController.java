@@ -1,18 +1,22 @@
 package com.example.bookshelf.controller;
 
 import com.example.bookshelf.entity.Book;
+import com.example.bookshelf.entity.Shelf;
 import com.example.bookshelf.service.BookChapterService;
 import com.example.bookshelf.service.BookService;
 import com.example.bookshelf.service.ReadRecordService;
+import com.example.bookshelf.service.ShelfService;
 import com.example.bookshelf.util.FileUtil;
 import com.example.bookshelf.util.SecurityUtil;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.List;
 
 /**
  * 图书管理控制器
@@ -29,9 +33,11 @@ public class BookController {
     private BookChapterService bookChapterService;
     @Resource
     private ReadRecordService readRecordService;
+    @Resource
+    private ShelfService shelfService;
 
     /**
-     * 书籍导入接口
+     * 书籍导入接口（导入成功后重定向到目标书架，不变）
      */
     @PostMapping("/import")
     public String importBook(@RequestParam("bookFile") MultipartFile bookFile,
@@ -40,31 +46,18 @@ public class BookController {
                              @RequestParam(required = false) Long shelfId,
                              RedirectAttributes redirectAttributes) {
         try {
-            // 1. 上传文件
             String filePath = fileUtil.uploadBookFile(bookFile);
-
-            // 2. 解析书籍信息
             String originalFileName = bookFile.getOriginalFilename();
             assert originalFileName != null;
             String format = originalFileName.substring(originalFileName.lastIndexOf(".") + 1).toUpperCase();
+            Long targetShelfId = shelfId == null ? 1L : shelfId;
 
-            // 3. 入库
-            bookService.saveBook(
-                    bookName,
-                    author,
-                    "",
-                    filePath,
-                    format,
-                    shelfId == null ? 1L : shelfId,
-                    getCurrentUserId()
-            );
-
-            // 4. 传递成功提示（Flash 属性）
-            redirectAttributes.addFlashAttribute("msg", "导入成功");
-            return "redirect:/book/importPage";
+            bookService.saveBook(bookName, author, "", filePath, format, targetShelfId, getCurrentUserId());
+            redirectAttributes.addFlashAttribute("successMsg", "导入成功");
+            return "redirect:/shelf/shelfList/" + targetShelfId; // 导入后重定向到目标书架
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "导入失败：" + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMsg", "导入失败：" + e.getMessage());
             return "redirect:/book/importPage";
         }
     }
@@ -73,102 +66,114 @@ public class BookController {
      * 书籍导入页接口
      */
     @GetMapping("/importPage")
-    public String importPage() {
-        // 跳转至 book/import.html 页面
+    public String importPage(Model model) {
+        // 1. 获取当前登录用户ID
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+
+        // 2. 查询该用户的所有书架
+        List<Shelf> userShelves = shelfService.getShelvesByUserId(currentUserId);
+
+        // 3. 将书架列表放入Model，供前端下拉框使用
+        model.addAttribute("shelfList", userShelves);
+
         return "book/import";
     }
 
     /**
-     * 拆分书籍章节（仅支持 TXT 格式）
+     * 拆分书籍章节（接收前端传的shelfId，重定向回当前书架）
      */
     @PostMapping("/splitChapters/{bookId}")
     public String splitBookChapters(@PathVariable Long bookId,
+                                    @RequestParam(required = false) Long shelfId, // 接收前端传的书架ID
                                     RedirectAttributes redirectAttributes) {
         try {
-            // 1. 查询书籍信息
             Book book = bookService.getBookById(bookId);
             if (book == null) {
                 redirectAttributes.addFlashAttribute("errorMsg", "书籍不存在，无法拆分章节");
-                return "redirect:/shelf/shelfList/1"; // 修正拼写错误：shelfLsit -> shelfList
+                return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, null);
             }
 
-            // 2. 验证书籍格式
             if (!"TXT".equals(book.getFormat())) {
                 redirectAttributes.addFlashAttribute("errorMsg", "仅支持 TXT 格式书籍拆分章节");
-                return "redirect:/shelf/shelfList/1";
+                return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, book.getShelfId());
             }
 
-            // 3. 构建 TXT 文件路径
-            String bookFilePath = book.getFilePath();
-            File txtFile = new File(bookFilePath);
-
-            // 4. 验证文件是否存在
+            File txtFile = new File(book.getFilePath());
             if (!txtFile.exists()) {
                 redirectAttributes.addFlashAttribute("errorMsg", "TXT 文件不存在，无法拆分章节");
-                return "redirect:/shelf/shelfList/1";
+                return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, book.getShelfId());
             }
 
-            // 5. 调用章节拆分服务
             bookChapterService.splitTxtToChapters(book, txtFile);
-
-            // 6. 拆分成功提示
             redirectAttributes.addFlashAttribute("successMsg", "章节拆分成功！可点击「立即阅读」查看");
         } catch (Exception e) {
-            // 异常处理
             redirectAttributes.addFlashAttribute("errorMsg", "章节拆分失败：" + e.getMessage());
             e.printStackTrace();
         }
 
-        // 重定向回书架页面
-        return "redirect:/shelf/shelfList/1";
+        // 重定向：优先用前端传的shelfId，兜底到书籍所属书架，再兜底到1
+        return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, null);
     }
 
     /**
-     * 【新增】删除书籍接口
+     * 删除书籍接口（接收前端传的shelfId，重定向回当前书架）
      */
     @GetMapping("/delete/{bookId}")
-    public String deleteBook(@PathVariable Long bookId, RedirectAttributes redirectAttributes) {
+    public String deleteBook(@PathVariable Long bookId,
+                             @RequestParam(required = false) Long shelfId, // 接收前端传的书架ID
+                             RedirectAttributes redirectAttributes) {
+        Book book = null;
         try {
-            // 1. 查询书籍信息
-            Book book = bookService.getBookById(bookId);
+            book = bookService.getBookById(bookId);
             if (book == null) {
                 redirectAttributes.addFlashAttribute("errorMsg", "删除失败：书籍不存在");
-                return "redirect:/shelf/shelfList/1";
+                return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, null);
             }
 
-            // 2. 权限校验（可选但推荐：确保只能删除自己的书）
+            // 权限校验
             Long currentUserId = getCurrentUserId();
             if (!currentUserId.equals(book.getUploadUserId())) {
                 redirectAttributes.addFlashAttribute("errorMsg", "删除失败：你没有权限删除该书籍");
-                return "redirect:/shelf/shelfList/1";
+                return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, book.getShelfId());
             }
 
-            // 3. 删除服务器上的书籍文件
-            String filePath = book.getFilePath();
-            File bookFile = new File(filePath);
+            // 删除文件
+            File bookFile = new File(book.getFilePath());
             if (bookFile.exists() && !bookFile.delete()) {
-                // 如果文件删除失败，可以选择记录日志或抛出异常，这里选择提示但继续删除数据库记录
                 redirectAttributes.addFlashAttribute("warnMsg", "书籍文件删除失败，但数据库记录已清除");
             }
 
-            // 4. 删除数据库中的书籍关联数据（章节、阅读记录）和书籍本身
-            bookChapterService.deleteChaptersByBookId(bookId); // 先删章节
-            readRecordService.deleteReadRecordsByBookId(bookId); // 再删阅读记录
-            bookService.deleteBookById(bookId); // 最后删书籍
+            // 删除关联数据
+            bookChapterService.deleteChaptersByBookId(bookId);
+            readRecordService.deleteReadRecordsByBookId(bookId);
+            bookService.deleteBookById(bookId);
 
-            // 5. 成功提示
             redirectAttributes.addFlashAttribute("successMsg", "书籍《" + book.getBookName() + "》删除成功！");
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMsg", "删除失败：" + e.getMessage());
         }
 
-        // 6. 重定向回书架页面
-        return "redirect:/shelf/shelfList/1";
+        // 重定向：优先用前端传的shelfId，兜底到书籍所属书架，再兜底到1
+        return "redirect:/shelf/shelfList/" + getFinalShelfId(shelfId, book != null ? book.getShelfId() : null);
     }
 
     /**
-     * 获取当前登录用户ID
+     * 【工具方法】获取最终重定向的书架ID（多层兜底）
+     * 优先级：前端传的shelfId → 书籍所属书架ID → 默认书架1
+     */
+    private Long getFinalShelfId(Long frontShelfId, Long bookShelfId) {
+        if (frontShelfId != null) {
+            return frontShelfId; // 第一优先级：前端传递的当前书架ID
+        }
+        if (bookShelfId != null) {
+            return bookShelfId; // 第二优先级：书籍所属书架ID
+        }
+        return 1L; // 第三优先级：默认书架
+    }
+
+    /**
+     * 获取当前登录用户ID（不变）
      */
     private Long getCurrentUserId() {
         return SecurityUtil.getCurrentUserId();

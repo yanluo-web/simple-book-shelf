@@ -4,37 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>极简书架 - 导入书籍</title>
-    <!-- 引入 Bootstrap 样式（保证面板、表单样式生效） -->
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 自定义样式，提升美观度 -->
     <style>
-        /* 全局样式重置与优化 */
+        /* 你的原有 CSS 样式保持不变 */
         body {
             font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background-color: #f5f7fa;
             padding-top: 80px;
             padding-bottom: 50px;
         }
-
-        /* 导航栏样式（与公共片段保持一致，保证风格统一） */
         .navbar-inverse {
             background-color: #2f4050;
             border: none;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-
         .navbar-inverse .navbar-brand,
         .navbar-inverse .navbar-nav > li > a {
             color: #f3f3f4;
         }
-
         .navbar-inverse .navbar-brand:hover,
         .navbar-inverse .navbar-nav > li > a:hover {
             color: #1ab394;
             background-color: transparent;
         }
-
-        /* 表单容器样式 */
         .form-container {
             max-width: 800px;
             margin: 0 auto;
@@ -44,14 +36,11 @@
             padding: 30px;
             margin-bottom: 30px;
         }
-
-        /* 面板标题样式优化 */
         .panel-primary {
             border: none;
             border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
-
         .panel-primary .panel-heading {
             background-color: #1ab394;
             border: none;
@@ -60,20 +49,14 @@
             font-size: 18px;
             font-weight: 500;
         }
-
-        /* 表单组间距优化 */
         .form-group {
             margin-bottom: 25px;
         }
-
-        /* 标签样式优化 */
         .control-label {
             font-weight: 500;
             color: #676a6c;
             font-size: 14px;
         }
-
-        /* 输入框、下拉框样式优化 */
         .form-control {
             height: 40px;
             border: 1px solid #e6e6e6;
@@ -83,25 +66,19 @@
             box-shadow: none;
             transition: border-color 0.3s ease;
         }
-
         .form-control:focus {
             border-color: #1ab394;
             box-shadow: 0 0 5px rgba(26, 179, 148, 0.2);
             outline: none;
         }
-
-        /* 文件上传框样式优化 */
         input[type="file"] {
             margin-top: 8px;
         }
-
         .help-block {
             color: #999;
             font-size: 12px;
             margin-top: 5px;
         }
-
-        /* 提交按钮样式优化 */
         .btn-primary {
             background-color: #1ab394;
             border: none;
@@ -111,21 +88,16 @@
             font-weight: 500;
             transition: background-color 0.3s ease;
         }
-
         .btn-primary:hover,
         .btn-primary:focus {
             background-color: #18a689;
             border: none;
             outline: none;
         }
-
-        /* ========== 新增：提示信息样式优化 ========== */
         .tip-container {
             max-width: 800px;
             margin: 0 auto 20px auto;
         }
-
-        /* 成功提示样式 */
         .success-tip {
             padding: 15px 20px;
             background-color: #f0f9f6;
@@ -136,8 +108,6 @@
             text-align: center;
             box-shadow: 0 1px 3px rgba(26, 179, 148, 0.1);
         }
-
-        /* 失败提示样式 */
         .error-tip {
             padding: 15px 20px;
             background-color: #fdf7f7;
@@ -151,19 +121,17 @@
     </style>
 </head>
 <body>
-<!-- ========== 替换：引入公共导航栏片段 ========== -->
-<!-- 传入 activePage="import"，标记「导入书籍」为当前活跃页面 -->
+<!-- 引入公共导航栏 -->
 <div th:replace="common/navbar :: commonNavbar('import')"></div>
 
-<!-- ========== 优化：提示信息（居中、美观、与表单宽度一致） ========== -->
+<!-- 提示信息 -->
 <div class="tip-container">
     <div th:if="${msg}" class="success-tip" th:text="${msg}"></div>
     <div th:if="${error}" class="error-tip" th:text="${error}"></div>
 </div>
 
-<!-- 表单容器（居中限制宽度，添加阴影和圆角） -->
+<!-- 表单容器 -->
 <div class="form-container">
-    <!-- 书籍导入表单 -->
     <div class="panel panel-primary">
         <div class="panel-heading">导入书籍</div>
         <div class="panel-body">
@@ -180,14 +148,23 @@
                         <input type="text" class="form-control" id="author" name="author" placeholder="请输入作者名称" required>
                     </div>
                 </div>
+
+                <!-- ========== 核心修改：动态生成书架下拉框 ========== -->
                 <div class="form-group">
                     <label for="shelfId" class="col-sm-2 control-label">所属书架</label>
                     <div class="col-sm-10">
                         <select class="form-control" id="shelfId" name="shelfId" required>
-                            <option value="1">默认书架</option>
+                            <!-- 循环遍历后端传来的 shelfList，动态生成选项 -->
+                            <option th:each="shelf : ${shelfList}"
+                                    th:value="${shelf.id}"
+                                    th:text="${shelf.shelfName}">
+                                书架名称
+                            </option>
                         </select>
                     </div>
                 </div>
+                <!-- ============================================== -->
+
                 <div class="form-group">
                     <label for="bookFile" class="col-sm-2 control-label">书籍文件</label>
                     <div class="col-sm-10">
@@ -205,7 +182,6 @@
     </div>
 </div>
 
-<!-- 引入 jQuery 和 Bootstrap JS（保证潜在交互功能生效） -->
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
