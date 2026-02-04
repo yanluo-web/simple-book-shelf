@@ -25,8 +25,13 @@ public interface ShelfMapper {
     @Update("UPDATE sys_shelf SET shelf_name = #{shelfName}, description = #{description} WHERE id = #{id}")
     int updateById(Shelf shelf);
 
-    @Delete("DELETE FROM sys_book WHERE shelf_id = #{shelfId}")
-    int deleteBooksByShelfId(@Param("shelfId") Long shelfId);
+    /**
+     * 将指定书架的书籍转移到默认书架
+     * @param shelfId 原书架ID
+     * @param defaultShelfId 默认书架ID（固定1）
+     */
+    @Update("UPDATE sys_book SET shelf_id = #{defaultShelfId} WHERE shelf_id = #{shelfId}")
+    int moveBooksToDefaultShelf(@Param("shelfId") Long shelfId, @Param("defaultShelfId") Long defaultShelfId);
 
     @Delete("DELETE FROM sys_shelf WHERE id = #{shelfId}")
     int deleteById(@Param("shelfId") Long shelfId);
@@ -36,7 +41,6 @@ public interface ShelfMapper {
      */
     @Select("SELECT s.*, " +
             "(SELECT COUNT(*) FROM sys_book b WHERE b.shelf_id = s.id AND b.upload_user_id = #{userId}) AS bookCount " +
-            "FROM sys_shelf s " +
-            "WHERE s.create_user_id = #{userId}")
+            "FROM sys_shelf s ")//WHERE s.create_user_id = #{userId}
     List<Shelf> selectByUserId(@Param("userId") Long userId);
 }

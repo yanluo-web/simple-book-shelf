@@ -62,9 +62,15 @@ public class ShelfServiceImpl implements ShelfService {
 
     @Override
     public void deleteShelf(Long shelfId) {
-        // 先删除书架下的所有书籍（避免数据残留）
-        shelfMapper.deleteBooksByShelfId(shelfId);
-        // 再删除书架本身
+        // 1. 禁止删除默认书架（防止误删）
+        if (shelfId == 1) {
+            throw new RuntimeException("默认书架不能删除！");
+        }
+
+        // 2. 将该书架下的所有书籍 转移到 默认书架（ID=1）
+        shelfMapper.moveBooksToDefaultShelf(shelfId, 1L);
+
+        // 3. 再删除书架本身
         shelfMapper.deleteById(shelfId);
     }
 
