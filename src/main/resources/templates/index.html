@@ -8,41 +8,64 @@
         /* 修复导航栏固定导致的内容遮挡，优化间距 */
         body {
             padding-top: 70px;
+            font-family: "Microsoft YaHei", sans-serif;
         }
         .thumbnail {
             text-align: center;
             transition: box-shadow 0.3s ease;
+            height: 100%; /* 确保卡片高度一致 */
+            display: flex;
+            flex-direction: column;
+        }
+        .thumbnail img {
+            max-height: 150px;
+            object-fit: cover; /* 保持图片比例 */
+        }
+        .thumbnail .caption {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .thumbnail:hover {
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-<!-- ========== 替换：引入公共导航栏片段 ========== -->
-<!-- 传入 activePage="index"，标记「首页」为当前活跃页面 -->
+<!-- 引入公共导航栏 -->
 <div th:replace="common/navbar :: commonNavbar('index')"></div>
 
 <div class="container">
     <!-- 书架列表 -->
     <div class="panel panel-default">
-        <div class="panel-heading">我的书架</div>
+        <div class="panel-heading">
+            <h3 class="panel-title">我的书架</h3>
+        </div>
         <div class="panel-body">
             <div class="row">
-                <div class="col-md-3">
+                <!-- 循环遍历所有书架 -->
+                <div class="col-md-3 col-sm-4 col-xs-6" th:each="shelf : ${shelfList}">
                     <div class="thumbnail">
                         <img src="https://cdn.bootcdn.net/ajax/libs/placeholder/4.0.1/placeholder-400x300.png"
                              alt="书架封面" class="img-responsive">
                         <div class="caption">
-                            <h3>默认书架</h3>
-                            <!-- 实时渲染书籍数量：从后端 model 中获取 -->
-                            <p th:text="'包含 ' + ${bookCount} + ' 本书'">包含 0 本书</p>
-                            <!-- 进入书架详情页：跳转至 /book/shelf/{defaultShelfId} -->
+                            <h3 th:text="${shelf.shelfName}">书架名称</h3>
                             <p>
-                                <a th:href="'/shelf/shelfList/' + ${defaultShelfId}"
-                                   class="btn btn-primary" role="button">进入书架</a>
+                                <span class="label label-info" th:text="'共 ' + ${shelf.bookCount} + ' 本书'">共 0 本书</span>
+                            </p>
+                            <p>
+                                <a th:href="@{/shelf/shelfList/{id}(id=${shelf.id})}"
+                                   class="btn btn-primary btn-block" role="button">进入书架</a>
                             </p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 无书架时的提示 -->
+                <div class="col-md-12 text-center" th:if="${#lists.isEmpty(shelfList)}">
+                    <div class="alert alert-warning">
+                        <p>您还没有创建任何书架，请先去 <a href="/shelf/manage">书架管理</a> 中创建。</p>
                     </div>
                 </div>
             </div>
@@ -50,7 +73,6 @@
     </div>
 </div>
 
-<!-- 引入 jQuery 和 Bootstrap JS（可选，增强交互） -->
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>

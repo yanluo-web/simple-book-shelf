@@ -30,4 +30,14 @@ public class Shelf {
      * 创建时间
      */
     private Date createTime;
+
+    /**
+     * 创建人昵称（新增，用于前端显示）
+     */
+    private String createUserName;
+
+    /**
+     * 书架内书籍数量（用于首页展示）
+     */
+    private Integer bookCount;
 }

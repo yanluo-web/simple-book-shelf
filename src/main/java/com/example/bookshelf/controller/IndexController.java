@@ -1,5 +1,6 @@
 package com.example.bookshelf.controller;
 
+import com.example.bookshelf.entity.Shelf;
 import com.example.bookshelf.service.ShelfService;
 import com.example.bookshelf.util.SecurityUtil;
 import org.springframework.stereotype.Controller;
@@ -7,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Controller
 public class IndexController {
@@ -23,19 +25,16 @@ public class IndexController {
     }
 
     /**
-     * 首页接口（传递默认书架书籍数量）
-     * @param model
-     * @return
+     * 首页接口（展示当前用户的所有书架）
      */
     @GetMapping("/index")
     public String index(Model model) {
-        // 默认书架 ID=1（对应 data.sql 中插入的默认书架）
-        Long defaultShelfId = 1L;
-        // 查询默认书架书籍数量
-        Integer bookCount = shelfService.getBookCountByShelfId(defaultShelfId, SecurityUtil.getCurrentUserId());
-        // 传递到前端页面
-        model.addAttribute("defaultShelfId", defaultShelfId);
-        model.addAttribute("bookCount", bookCount);
+        // 获取当前登录用户ID
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+        // 查询当前用户的所有书架
+        List<Shelf> shelfList = shelfService.getShelvesByUserId(currentUserId);
+
+        model.addAttribute("shelfList", shelfList);
         return "index";
     }
 }

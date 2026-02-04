@@ -19,7 +19,7 @@ public class UserController {
     /**
      * 进入用户管理页面（仅管理员可访问，此处简化权限控制，后续可整合 Spring Security）
      */
-    @GetMapping("/manage")
+    @GetMapping("/userManage")
     public String userManage(Model model) {
         // 1. 查询所有用户
         List<User> userList = userService.getAllUsers();
@@ -28,7 +28,7 @@ public class UserController {
         // 2. 传递管理员标识（用于导航栏显示）
         model.addAttribute("isAdmin", true); // 此处简化，实际应从登录用户信息中获取
 
-        return "user/manage";
+        return "/user/userManage";
     }
 
     /**
@@ -42,7 +42,7 @@ public class UserController {
         } else {
             redirectAttributes.addFlashAttribute("error", "用户新增失败！");
         }
-        return "redirect:/user/manage";
+        return "redirect:/user/userManage";
     }
 
     /**
@@ -56,7 +56,7 @@ public class UserController {
         } else {
             redirectAttributes.addFlashAttribute("error", "用户修改失败！");
         }
-        return "redirect:/user/manage";
+        return "redirect:/user/userManage";
     }
 
     /**
@@ -71,7 +71,7 @@ public class UserController {
         } else {
             redirectAttributes.addFlashAttribute("error", "密码修改失败！");
         }
-        return "redirect:/user/manage";
+        return "redirect:/user/userManage";
     }
 
     /**
@@ -85,6 +85,6 @@ public class UserController {
         } else {
             redirectAttributes.addFlashAttribute("error", "用户删除失败（禁止删除管理员）！");
         }
-        return "redirect:/user/manage";
+        return "redirect:/user/userManage";
     }
 }

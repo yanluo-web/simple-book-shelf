@@ -1,35 +1,77 @@
 <!DOCTYPE html>
-<!-- 新增 Spring Security 命名空间：sec -->
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 顶部导航栏：固定顶部，宽度100% */
+        .navbar-fixed-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+
+        /* 左侧侧边栏：固定左侧，不随页面滚动，宽度固定 */
+        .sidebar {
+            position: fixed;
+            top: 50px; /* 紧贴顶部导航栏（导航栏高度默认50px） */
+            left: 0;
+            bottom: 0; /* 占满剩余高度 */
+            width: 180px; /* 固定宽度，不占用主内容宽度 */
+            background-color: #2c3e50; /* 深色侧边栏，区分主内容 */
+            padding-top: 20px;
+            z-index: 1020;
+            overflow-y: auto; /* 菜单过多时可滚动 */
+        }
+
+        /* 侧边栏菜单样式 */
+        .sidebar .nav > li > a {
+            color: #ecf0f1;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .nav > li > a:hover,
+        .sidebar .nav > li.active > a {
+            background-color: #34495e;
+            border-left-color: #3498db; /* 选中时左侧高亮线 */
+            color: #fff;
+        }
+
+        /* 主内容区：向右偏移，避开侧边栏 */
+        .main-content {
+            margin-left: 180px; /* 与侧边栏宽度一致 */
+            padding: 60px 20px 20px; /* 顶部留空（避开导航栏）+ 左右内边距 */
+            min-height: 100vh; /* 占满视口高度 */
+        }
+    </style>
+</head>
 <body>
-<!-- 定义导航栏片段，仅保留 activePage 参数，移除 isAdmin 参数 -->
+<!-- 1. 顶部导航栏（仅保留核心菜单，宽度100%） -->
 <nav class="navbar navbar-inverse navbar-fixed-top" th:fragment="commonNavbar(activePage)">
-    <div class="container">
+    <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="/index">极简书架</a>
         </div>
-        <div class="navbar-collapse collapse">
+        <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <!-- 根据传入的 activePage 判断哪个菜单项高亮 -->
                 <li th:class="${activePage == 'index' ? 'active' : ''}">
                     <a href="/index">我的书架</a>
                 </li>
                 <li th:class="${activePage == 'import' ? 'active' : ''}">
                     <a href="/book/importPage">导入书籍</a>
                 </li>
-                <!-- 管理员专属菜单：自动判断当前登录用户是否为 ADMIN 角色，无需手动传参 -->
-                <li th:class="${activePage == 'user' ? 'active' : ''}"
-                    sec:authorize="hasRole('ADMIN')"> <!-- 核心：Spring Security 角色判断 -->
-                    <a href="/user/manage">用户管理</a>
+                <!-- 基础数据管理：仅管理员可见，点击后跳转到管理页（侧边栏自动显示） -->
+                <li th:class="${activePage == 'basicData' ? 'active' : ''}" sec:authorize="hasRole('ADMIN')">
+                    <a href="/user/userManage">基础数据管理</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <!-- 可选：显示当前登录用户名 -->
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <span sec:authentication="name">当前用户</span> <!-- 获取当前登录用户名 -->
-                        <span class="caret"></span>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span sec:authentication="name">当前用户</span> <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="/logout">退出登录</a></li>
@@ -39,5 +81,20 @@
         </div>
     </div>
 </nav>
+
+<!-- 2. 左侧侧边栏（仅管理员可见，固定左侧） -->
+<div class="sidebar" th:fragment="basicDataSidebar(activeSidebar)" sec:authorize="hasRole('ADMIN')">
+    <ul class="nav nav-pills nav-stacked">
+        <li th:class="${activeSidebar == 'user' ? 'active' : ''}">
+            <a href="/user/userManage">用户管理</a>
+        </li>
+        <li th:class="${activeSidebar == 'shelf' ? 'active' : ''}">
+            <a href="/shelf/shelfManage">书架管理</a>
+        </li>
+    </ul>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
 </html>
