@@ -118,7 +118,7 @@
                         &nbsp;&nbsp;
                         章节：<span th:text="${currentChapter.chapterOrder ?: 0} + '/' + ${chapters != null ? chapters.size() : 0}">1/100</span>
                         &nbsp;&nbsp;
-                        <a th:href="'/shelf/shelfLsit/' + ${book.shelfId ?: 1}" class="btn btn-xs btn-default">返回书架</a>
+                        <a th:href="'/shelf/shelfList/' + ${book.shelfId ?: 1}" class="btn btn-xs btn-default">返回书架</a>
                     </p>
 
                     <!-- ========== 顶部上一章/下一章按钮 ========== -->

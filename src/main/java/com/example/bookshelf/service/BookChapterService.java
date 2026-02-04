@@ -31,4 +31,10 @@ public interface BookChapterService {
      * @return 章节实体
      */
     BookChapter getById(Long chapterId);
+
+    /**
+     * 书籍删除
+     * @param bookId
+     */
+    void deleteChaptersByBookId(Long bookId);
 }

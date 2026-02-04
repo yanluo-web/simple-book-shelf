@@ -44,7 +44,7 @@ public interface BookService {
     Book getBookById(Long bookId);
 
     /**
-     * 根据书籍ID删除书籍（含文件删除+数据库删除）
+     * 根据书籍ID删除书籍
      * @param bookId
      */
     void deleteBookById(Long bookId);

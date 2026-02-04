@@ -59,7 +59,7 @@ public interface BookMapper {
     List<Book> getMyBookList(Long uploadUserId);
 
     /**
-     * 根据书籍ID删除书籍（含文件删除+数据库删除）
+     * 根据书籍ID删除书籍
      * @param bookId
      */
     @Delete("DELETE FROM sys_book WHERE id = #{bookId}")

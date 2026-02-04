@@ -59,4 +59,10 @@ public class ReadRecordServiceImpl implements ReadRecordService {
     public List<ReadRecord> getReadRecordsByUser(User user) {
         return readRecordMapper.findByUserOrderByLastReadTimeDesc(user);
     }
+
+    @Override
+    public void deleteReadRecordsByBookId(Long bookId) {
+        // 调用Mapper层方法删除数据
+        readRecordMapper.deleteByBookId(bookId);
+    }
 }

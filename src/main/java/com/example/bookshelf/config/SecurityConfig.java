@@ -41,9 +41,9 @@ public class SecurityConfig {
                 // 公开接口：无需登录即可访问（避免重定向到登录页）
                 .antMatchers("/login", "/h2-console/**", "/static/**").permitAll()
                 // 管理员专属接口：需 ADMIN 角色，否则重定向到登录/403
-                .antMatchers("/admin/**", "/shelf/create", "/book/delete","/user/manage").hasRole("ADMIN")
+                .antMatchers("/admin/**", "/shelf/create","/user/manage").hasRole("ADMIN")
                 // 可选：显式配置 /book/** 接口（普通用户登录后可访问，与 anyRequest 效果一致，更清晰）
-                .antMatchers("/book/**","/read/**").authenticated()
+                .antMatchers("/book/**","/read/**","/shelf/**").authenticated()
                 // 其他所有接口：登录后即可访问（覆盖 /book/** 等普通接口，避免未授权重定向）
                 .anyRequest().authenticated()
                 // 登录配置（处理登录相关重定向，避免异常）

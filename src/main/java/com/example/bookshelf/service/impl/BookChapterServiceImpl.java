@@ -163,4 +163,12 @@ public class BookChapterServiceImpl implements BookChapterService {
         // 调用 JpaRepository 自带的 findById，若不存在则抛出异常，方便前端排查
         return bookChapterMapper.findById(chapterId);
     }
+
+    /**
+     * 书籍删除
+     * @param bookId
+     */
+    public void deleteChaptersByBookId(Long bookId) {
+        bookChapterMapper.deleteByBookId(bookId);
+    }
 }

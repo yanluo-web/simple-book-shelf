@@ -23,7 +23,7 @@ public class ShelfController {
     /**
      * 书架详情接口（展示书架下所有书籍）
      */
-    @GetMapping("/shelfLsit/{shelfId}")
+    @GetMapping("/shelfList/{shelfId}")
     public String shelfDetail(@PathVariable Long shelfId, Model model) {
         // 查询书架书籍列表
         List<Book> bookList = shelfService.getBookListByShelfId(shelfId, SecurityUtil.getCurrentUserId());

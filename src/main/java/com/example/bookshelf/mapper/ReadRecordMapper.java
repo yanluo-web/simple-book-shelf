@@ -44,4 +44,13 @@ public interface ReadRecordMapper {
     @Update("UPDATE read_record SET read_position = #{readPosition}, chapter_id = #{chapterId}, last_read_time = NOW() " +
             "WHERE user_id = #{userId} AND book_id = #{bookId}")
     int updateByUserBookChapter(ReadRecord readRecord);
+
+    /**
+     * 根据书籍ID删除对应的所有阅读记录
+     * 用于删除书籍时，级联删除该书籍的所有阅读记录
+     * @param bookId 书籍ID
+     * @return 受影响的行数
+     */
+    @Delete("DELETE FROM read_record WHERE book_id = #{bookId}")
+    int deleteByBookId(@Param("bookId") Long bookId);
 }

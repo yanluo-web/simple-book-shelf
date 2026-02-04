@@ -44,6 +44,11 @@
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <span th:text="${errorMsg}"></span>
     </div>
+    <!-- 新增：文件删除失败警告提示 -->
+    <div th:if="${warnMsg != null and not #strings.isEmpty(warnMsg)}" class="alert alert-warning alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <span th:text="${warnMsg}"></span>
+    </div>
 
     <!-- 书架标题 + 图书数量（用 th:with 定义临时变量，拆分拼接，兼容低版本） -->
     <div class="page-header" th:with="bookCount=${bookList != null ? #lists.size(bookList) : 0}">
@@ -79,6 +84,13 @@
                         <form th:action="@{/book/splitChapters/{id}(id=${book.id})}" method="post" style="display: inline-block;">
                             <button type="submit" class="btn btn-primary" th:disabled="${book.format != 'TXT'}">
                                 拆分章节
+                            </button>
+                        </form>
+                        <!-- 新增：删除按钮，与原有按钮风格统一，带删除确认 -->
+                        <form th:action="@{/book/delete/{id}(id=${book.id})}" method="get" style="display: inline-block;"
+                              onsubmit="return confirm('确定要删除《' + ([[${book.bookName}]] || '未知书籍') + '》吗？删除后无法恢复！');">
+                            <button type="submit" class="btn btn-danger">
+                                删除书籍
                             </button>
                         </form>
                     </div>

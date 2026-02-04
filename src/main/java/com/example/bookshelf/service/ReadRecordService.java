@@ -30,5 +30,13 @@ public interface ReadRecordService {
      * 根据用户查询所有阅读记录
      */
     List<ReadRecord> getReadRecordsByUser(User user);
+
+    /**
+     * 根据书籍ID删除所有相关阅读记录
+     * @param bookId 书籍ID
+     */
+    void deleteReadRecordsByBookId(Long bookId);
+
+
 }
 
