@@ -48,8 +48,8 @@ public class BookChapterServiceImpl implements BookChapterService {
             // - 章：原有规则不变
             String chapterRegex =
                     "(序(?:言|子)?[:：])|" +  // 仅匹配“序：”“序言：”“引子：”（必须带冒号）
-                            "(第[一二三四五六七八九十百千万\\d]+节(?:\\s+.+)?)|" +  // 匹配“第1节”“第三节 标题”等
-                            "(第[一二三四五六七八九十百千万\\d]+章(?:\\s+.+)?)|" +  // 原有章匹配
+                            "(第[零一二三四五六七八九十百千万\\d]+节(?:\\s+.+)?)|" +  // 匹配“第1节”“第三节 标题”等
+                            "(第[零一二三四五六七八九十百千万\\d]+章(?:\\s+.+)?)|" +  // 原有章匹配
                             "(Chapter\\s+\\d+(?:\\s+.+)?)";
             Pattern pattern = Pattern.compile(chapterRegex);
             Matcher matcher = pattern.matcher(txtContent);
