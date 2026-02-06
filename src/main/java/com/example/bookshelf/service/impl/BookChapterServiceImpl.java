@@ -28,7 +28,7 @@ public class BookChapterServiceImpl implements BookChapterService {
     private final BookChapterMapper bookChapterMapper;
 
     /**
-     * 拆分 TXT 文件为章节并保存到数据库（新增序、节的检索）
+     * 拆分 TXT 文件为章节并保存到数据库（新增序、节的检索，优化标题为整行文本）
      * @param book 所属书籍实体
      * @param txtFile 上传的 TXT 文件
      */
@@ -54,14 +54,22 @@ public class BookChapterServiceImpl implements BookChapterService {
             Pattern pattern = Pattern.compile(chapterRegex);
             Matcher matcher = pattern.matcher(txtContent);
 
-            // 3. 收集章节起始位置和标题（兼容序、节、章）
+            // 3. 收集章节起始位置和【整行标题】（兼容序、节、章）
             List<ChapterPosition> chapterPositions = new ArrayList<>();
             while (matcher.find()) {
-                String chapterTitle = matcher.group().trim();
-                int startIndex = matcher.start();
-                // 优化标题显示（比如去掉多余的冒号）
+                int matchStart = matcher.start(); // 正则匹配的起始位置
+                // 步骤1：向前查找最近的换行符，确定行首位置
+                int lineStart = txtContent.lastIndexOf("\n", matchStart);
+                lineStart = (lineStart == -1) ? 0 : lineStart + 1; // 无换行则从文本开头开始，+1跳过换行符
+                // 步骤2：向后查找最近的换行符，确定行尾位置
+                int lineEnd = txtContent.indexOf("\n", matchStart);
+                lineEnd = (lineEnd == -1) ? txtContent.length() : lineEnd; // 无换行则到文本末尾
+                // 步骤3：截取整行作为标题，并优化显示
+                String chapterTitle = txtContent.substring(lineStart, lineEnd).trim();
+                // 去除标题末尾多余的冒号（针对序：、序言：等场景）
                 chapterTitle = chapterTitle.replaceAll("[:：]$", "").trim();
-                chapterPositions.add(new ChapterPosition(startIndex, chapterTitle));
+                // 保存章节起始位置（仍用正则匹配位置，避免标题行空白导致内容截取错误）和整行标题
+                chapterPositions.add(new ChapterPosition(matchStart, chapterTitle));
             }
 
             // 4. 处理无匹配章节的情况（整本书作为一个章节）
@@ -99,7 +107,7 @@ public class BookChapterServiceImpl implements BookChapterService {
                     // 第二步：截取章节内容（去除前后空白，优化显示）
                     String chapterContent = txtContent.substring(start, end).trim();
 
-                    // 第三步：封装章节实体
+                    // 第三步：封装章节实体（标题已为整行文本）
                     BookChapter chapter = new BookChapter();
                     chapter.setChapterTitle(current.getChapterTitle());
                     chapter.setChapterContent(chapterContent);
@@ -117,7 +125,6 @@ public class BookChapterServiceImpl implements BookChapterService {
             throw new RuntimeException("TXT 章节拆分失败：" + e.getMessage(), e);
         }
     }
-
 
     /**
      * 辅助类：存储章节起始位置和标题
